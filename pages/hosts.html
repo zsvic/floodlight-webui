@@ -149,45 +149,58 @@
 
     var url = "http://" + ipaddress + ":" + restport + "/wm/device/";
 
+    var data_hosts = [];
 
     $(document).ready(function () {
 
+        gethosts();
+
+       
+
+    });
+
+
+    function gethosts(){
         $.ajax({
             url: url, // your url where the php is
             dataType: 'json',
      
             success: function(data_response){
+
+                for(index in data_response){
+                    var host = {};
+                    host.mac = data_response[index].mac[0] ?  data_response[index].mac[0] : "";
+                    host.ipv4 = data_response[index].ipv4[0] ? data_response[index].ipv4[0] : "";
+                    host.ipv6 = data_response[index].ipv6[0] ? data_response[index].ipv6[0] : "";
+                    host.switch = data_response[index].attachmentPoint[0].switchDPID ?
+                                            data_response[index].attachmentPoint[0].switchDPID : "";
+                    host.port = data_response[index].attachmentPoint[0].port ?
+                                            data_response[index].attachmentPoint[0].port : "";
+                    host.lastSeen = Date();
+                    data_hosts.push(host);
+                }
+                
+                console.log(data_hosts);
+                $('#tableHosts').DataTable({
+                    searching: false,
+                    lengthChange: false,
+                    scrollX: true,
+                    paging: false,
+                    
+                    data: data_hosts,
+
+                    columns: [
+                        {data: 'mac'},
+                        {data: 'ipv4'},
+                        {data: 'ipv6'},
+                        {data: 'switch'},
+                        {data: 'port'},
+                        {data: 'lastSeen'}
+                     ]
+        });
             }
         });
-
-        $('#tableHosts').DataTable({
-            responsive: true,
-            searching: false,
-            lengthChange: false,
-            scrollX: true,
-            paging: false,
-            ajax: {
-                url: url,
-                dataSrc: 'devices'
-            },
-            "createdRow": function (data) {
-                data.lastSeen = Date(data.lastSeen);
-                console.log(data);
-            },
-
-            columns: [
-                {data: 'mac'},
-                {data: 'ipv4'},
-                {data: 'ipv6'},
-                {data: 'attachmentPoint[0].switch'},
-                {data: 'attachmentPoint[0].port'},
-                {data: 'lastSeen'}
-            ]
-        });
-
-    });
-
-
+    }
 </script>
 
 </body>
