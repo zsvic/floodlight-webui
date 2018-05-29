@@ -157,8 +157,8 @@
     var network = null;
 
     var DIR = '../bower_components/visjs/img/refresh-cl/';
-    var EDGE_LENGTH_MAIN = 50;
-    var EDGE_LENGTH_SUB = 50;
+    var EDGE_LENGTH_MAIN = 200;
+    var EDGE_LENGTH_SUB = 100;
 
     /*
     * This function draws the network and assigns actions to it as well.
@@ -196,54 +196,21 @@
 
     function loadExternalLinks(hosts) {
 
-        var url = "http://" + ipaddress + ":" + restport + "/wm/topology/external-links/json";
-
-        $.ajax({
-            url: url,
-            success: function (data) {
-                for (var i = 0; i < data.length; i++) {
-                    edges.push({
-                        from: "s" + data[i]["src-switch"],
-                        to: "s" + data[i]["dst-switch"],
-                        length: EDGE_LENGTH_MAIN,
-                        title: data[i]["src-switch"] + "/" + data[i]["src-port"] + "<br>" + data[i]["dst-switch"] + "/" + data[i]["dst-port"],
-                        color: 'red',
-                        width: 4
-                    });
-                }
-
                 for (var i = 0; i < hosts.length; i++) {
                     if (hosts[i]["attachmentPoint"].length > 0) {
-                        if (hosts[i].hasOwnProperty("trueAttachmentPoint") && hosts[i]["trueAttachmentPoint"][0] != null) {
-                            edges.push({
+                        edges.push({
                                 from: "h" + hosts[i]["mac"]
-                                , to: "s" + hosts[i]["trueAttachmentPoint"][0].switch, length: EDGE_LENGTH_MAIN,
-                                title: hosts[i]["trueAttachmentPoint"][0].switch + "/" + hosts[i]["trueAttachmentPoint"][0].port,
+                                , to: "s" + hosts[i]["attachmentPoint"][0].switchDPID, length: EDGE_LENGTH_MAIN,
+                                title: hosts[i]["attachmentPoint"][0].switchDPID + "/" + hosts[i]["attachmentPoint"][0].port,
                                 color: 'green',
                                 width: 2
-                            });
-                        }
-                        else {
-                            edges.push({
-                                from: "h" + hosts[i]["mac"]
-                                , to: "s" + hosts[i]["attachmentPoint"][0].switch, length: EDGE_LENGTH_MAIN,
-                                title: hosts[i]["attachmentPoint"][0].switch + "/" + hosts[i]["attachmentPoint"][0].port,
-                                color: 'green',
-                                width: 2
-                            });
-                        }
+                        });
                     }
                 }
 
-                loadInternalLinks();
+                loadInternalLinks({});
                 //draw();
-            },
-            error: function (jqXHR, textStatus, errorThrown) {
-                console.log(jqXHR.responseText);
-                alert('Error: ' + " " + jqXHR.responseText + " \n Status: " + textStatus + " \n Error Thrown: " +
-                        errorThrown);
-            }
-        });
+           
     }
 
     function loadInternalLinks(hosts) {
@@ -259,7 +226,7 @@
                 }
 
                 draw();
-                //LoadExternalLinks(hosts);
+                LoadExternalLinks(hosts);
             },
             error: function (jqXHR, textStatus, errorThrown) {
                 alert('Error: ' + " " + jqXHR.responseText + " \n Status: " + textStatus + " \n Error Thrown: " +
@@ -321,7 +288,7 @@
         $.ajax({
             url: "http://" + ipaddress + ":" + restport + "/wm/device/",
             success: function (hosts) {
-                hosts = hosts.devices;
+                //hosts = hosts.devices;
                 console.log(hosts);
                 for (var i = 0; i < hosts.length; i++) {
 
@@ -335,7 +302,11 @@
                             shape: 'image',
                             title: hosts[i]["mac"]
                         });
+                    
+                        
+                    
                     }
+                   
                 }
                 loadExternalLinks(hosts);
             },
